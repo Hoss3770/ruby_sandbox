@@ -18,7 +18,7 @@ def bubble_sort_by(items, &block)
     swapped = false
     for i in 0..items.size-2
       if block.call(items[i], items[i+1]) < 0
-        items[i], items[i+1] = items[i+1], items[i]
+        items[i], items[i+2] = items[i+1], items[i]
         swapped = true
       end
     end
