@@ -1,9 +1,7 @@
 class TicTacGame
 
-  def initialize(playerX, playerO)
+  def initialize()
     @board = Array.new(3) { Array.new(3) }
-		@playerX = playerX
-		@playerY = playerO
     @ended = false
   end
 
@@ -106,7 +104,7 @@ class TicTacGame
 
 	end
 
-  attr_accessor :playerX, :playerO, :ended
+  attr_accessor :ended
 
 	private
 	def get_position_num(n, j)
@@ -132,26 +130,37 @@ class Player
 end
 
 puts "Welcome to TicTacToe!"
+players = Array.new
 puts "Player x name:"
 nameX = gets.chomp
 pX = Player.new(nameX, "X")
 pX.say_hi
+players.push(pX)
 nameO = gets.chomp
 pO = Player.new(nameO, "O")
 pO.say_hi
-game = TicTacGame.new(pX, pO)
+players.push(pO)
+game = TicTacGame.new
 puts "Game started."
 while(!game.game_ended?)
-	puts "#{pX.name} pick a position:"
-  game.draw_board
-	pos = gets.chomp.to_i
-	game.make_move(pX, pos)
-	game.draw_board
-	puts "#{pO.name} pick a position:"
-	game.draw_board
-	pos = gets.chomp.to_i
-	game.make_move(pO, pos)
-	game.draw_board
-	game.check_board
+	players.each do |player|
+		puts "#{player.name} pick a position:"
+		game.draw_board
+		pos = gets.chomp.to_i
+		game.make_move(player, pos)
+		game.draw_board
+		game.check_board
+	end unless game.game_ended?
+ # puts "#{pX.name} pick a position:"
+  #game.draw_board
+	#pos = gets.chomp.to_i
+	#game.make_move(pX, pos)
+	#game.draw_board
+	#puts "#{pO.name} pick a position:"
+	#game.draw_board
+	#pos = gets.chomp.to_i
+	#game.make_move(pO, pos)
+	#game.draw_board
+ # game.check_board
 end
 
