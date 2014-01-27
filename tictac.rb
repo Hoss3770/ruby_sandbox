@@ -5,10 +5,6 @@ class TicTacGame
     @ended = false
   end
 
-  def game_ended?
-    return @ended
-  end
-
   def draw_board()
     @board.each_with_index do |row, row_index|
       row.each_with_index do |position, column_index|
@@ -83,7 +79,7 @@ class TicTacGame
         end_game(@board[0][0])
         return true
       end
-      if @board[0][2] == @board[1][1] && @board[1][1] == @board[2][2]
+      if @board[0][2] == @board[1][1] && @board[1][1] == @board[2][0]
         end_game(@board[1][2])
         return true
       end
@@ -103,6 +99,7 @@ class TicTacGame
   end
 
   def end_game(winner)
+    puts "end_game called"
     if not winner.nil?
       puts "#{winner.name} as #{winner.symbol} won!"
     else
@@ -150,14 +147,17 @@ pO.say_hi
 players.push(pO)
 game = TicTacGame.new
 puts "Game started."
-while(!game.game_ended?)
+while(!game.ended)
   players.each do |player|
     puts "#{player.name} pick a position:"
     game.draw_board
     pos = gets.chomp.to_i
     game.make_move(player, pos)
     game.draw_board
-    break if game.check_board
+    game.check_board
+    puts game.ended
+    break if game.ended
+    #break if game.check_board
   end
 end
 
