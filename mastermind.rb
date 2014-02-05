@@ -6,6 +6,7 @@ class MasterMind
     @colours = ["red", "blue", "green", "mint", "white", "lavendar"]
     @code = Array.new(4)
     pick_code
+    puts @code
   end
 
   def ended?()
@@ -26,12 +27,25 @@ class MasterMind
   end
 
   def make_guess(guess)
+    guess_array = guess.split(//)
+    if guess_array.size > @code.size
+      puts "illegal guess: too many colours"
+      return
+    end
     @guesses.push(guess)
-    check_board()
+    check_code(guess_array)
   end
 
   private
-  def check_board()
+  def check_code(guess_array)
+    num_correct = 0;
+    for i in 0..@code.size-1
+      if(guess_array[i] == @code[i][0])
+        num_correct = num_correct + 1;
+      end
+    end
+    puts "num_correct #{num_correct}"
+    
   end
 
   def pick_code()
