@@ -15,15 +15,23 @@ class MasterMind
 
   def draw_board()
     draw_colour_legend
-    puts "*********"
+    puts "*************"
     @guesses.each do |guessed|
-      puts guessed
+      print guessed[:guess].join(" ")
+      print " |"
+      for i in 0..guessed[:correct]-1
+        print "."
+      end
+      for i in 0..guessed[:almost]-1
+        print "^"
+      end
+      print "\n"
     end
     tries_to_go = @max_tries - @guesses.size - 1
     0.upto(tries_to_go) do
       puts "_ _ _ _"
     end
-    puts "*********"
+    puts "*************"
   end
 
   def make_guess(guess)
@@ -32,26 +40,35 @@ class MasterMind
       puts "illegal guess: too many colours"
       return
     end
-    @guesses.push(guess)
     check_code(guess_array)
   end
 
   private
   def check_code(guess_array)
+    guess_orig = guess_array.dup
     num_correct = 0;
     for i in 0..@code.size-1
-      if(guess_array[i] == @code[i][0])
-        num_correct = num_correct + 1;
+      if(guess_array[i] == @code[i])
+        num_correct = num_correct + 1
+        guess_array[i] = ""
       end
     end
     puts "num_correct #{num_correct}"
-    
+    num_almost = 0;
+    for i in 0..guess_array.size-1
+      if (@code.include?(guess_array[i]))
+        num_almost = num_almost + 1
+        guess_array[i] = ""
+      end
+    end
+    puts "num_almost #{num_almost}"
+    @guesses.push(:guess => guess_orig, :correct => num_correct, :almost => num_almost)
   end
 
   def pick_code()
     rand = Random.new()
     for i in 0..3
-      @code[i] = @colours[rand.rand(6)]
+      @code[i] = @colours[rand.rand(6)][0]
     end
   end
 
@@ -61,6 +78,7 @@ class MasterMind
       print "#{colour[0]}: #{colour} "
     end
     puts ""
+    puts ".: correct colour and position\n^:correct colour"
   end
 
 end
