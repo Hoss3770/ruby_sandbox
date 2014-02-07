@@ -1,7 +1,7 @@
 class MasterMind
 
   def initialize()
-    @max_tries = 2
+    @max_tries = 12
     @guesses = Array.new()
     @colours = ["red", "blue", "green", "mint", "white", "lavendar"]
     @code = Array.new(4)
@@ -10,7 +10,14 @@ class MasterMind
   end
 
   def ended?()
-    return @guesses.size >= @max_tries
+    if @guesses.size >= @max_tries
+      puts "out of moves! you lost."
+      return true
+    elsif !@guesses[-1].nil? && @guesses[-1][:correct] == 4
+      puts "you win!"
+      return true
+    end
+    return false
   end
 
   def draw_board()
