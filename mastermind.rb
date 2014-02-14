@@ -1,3 +1,5 @@
+require 'set'
+
 class MasterMind
 
   @@colours = ["red", "blue", "green", "mint", "white", "lavendar"]
@@ -5,9 +7,15 @@ class MasterMind
   def initialize()
     @max_tries = 12
     @guesses = Array.new()
-    @code = Array.new(4)
-    pick_code
-    puts @code.join("")
+    @code = nil
+    #else
+      #@code = code
+      #if(code.length != 4)
+        #print "Code illegal length. Please try again"
+      #elsif(!code.split(//).to_set.subset? @@colours.collect{|colour| colour[0]}.to_set)
+        #print "illegal colours in code. Please try again"
+      #end
+    #end
   end
 
   def self.draw_colour_legend()
@@ -15,6 +23,7 @@ class MasterMind
     @@colours.each do |colour|
       print "#{colour[0]}: #{colour} "
     end
+    print "\n"
   end
 
   def ended?()
@@ -30,7 +39,7 @@ class MasterMind
   end
 
   def draw_board()
-    self.draw_colour_legend
+    MasterMind.draw_colour_legend
     draw_feedback_legend
     puts "*************"
     @guesses.each do |guessed|
@@ -52,12 +61,28 @@ class MasterMind
   end
 
   def make_guess(guess)
+    if(@code.nil?)
+      @code = Array.new(4)
+      pick_code
+    end
+
     guess_array = guess.split(//)
     if guess_array.size > @code.size
       puts "illegal guess: too many colours"
       return
     end
     check_code(guess_array)
+  end
+
+  def solve(user_code)
+    if(user_code.length != 4)
+      print "Code illegal length. Please try again"
+      return
+    elsif(!user_code.split(//).to_set.subset? @@colours.collect{|colour| colour[0]}.to_set)
+      print "illegal colours in code. Please try again"
+      return
+    end
+    @code = user_code.split(//)
   end
 
   private
@@ -100,15 +125,18 @@ class MasterMind
     puts ""
     puts ".: correct colour and position\n^:correct colour"
   end
+
 end
 
 puts "Welcome to Mastermind!"
 puts "Enter c to create a code, otherwise press enter to guess"
+game = MasterMind.new
 if gets.chomp().downcase() == "c"
-  puts "create a code for the computer to guess:"
+  puts "create a code, of exactly 4 letters, for the computer to guess:"
   MasterMind.draw_colour_legend
+  user_code = gets.chomp()
+  game.solve(user_code)
 else
-  game = MasterMind.new
   game.draw_board
   while(!game.ended?)
     puts "make a guess:"
@@ -117,3 +145,4 @@ else
     game.draw_board
   end
 end
+
