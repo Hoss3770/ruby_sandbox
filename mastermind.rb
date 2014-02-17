@@ -63,15 +63,15 @@ class MasterMind
   def make_guess(guess)
     if(@code.nil?)
       @code = Array.new(4)
-      pick_code
+      @code = pick_code
     end
 
-    guess_array = guess.split(//)
-    if guess_array.size > @code.size
+    #guess_array = guess.split(//)
+    if guess.size > @code.size
       puts "illegal guess: too many colours"
       return
     end
-    check_code(guess_array)
+    check_code(guess)
   end
 
   def solve(user_code)
@@ -83,6 +83,12 @@ class MasterMind
       return
     end
     @code = user_code.split(//)
+    code = pick_code
+    while(!ended?)
+      code = pick_code
+      make_guess(code)
+      draw_board
+    end
   end
 
   private
@@ -116,9 +122,11 @@ class MasterMind
 
   def pick_code()
     rand = Random.new()
+    code = Array.new(4)
     for i in 0..3
-      @code[i] = @@colours[rand.rand(6)][0]
+      code[i] = @@colours[rand.rand(6)][0]
     end
+    return code
   end
 
   def draw_feedback_legend()
@@ -141,7 +149,7 @@ else
   while(!game.ended?)
     puts "make a guess:"
     guess = gets.chomp()
-    game.make_guess(guess)
+    game.make_guess(guess.split(//))
     game.draw_board
   end
 end
