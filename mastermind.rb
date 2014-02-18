@@ -8,14 +8,6 @@ class MasterMind
     @max_tries = 12
     @guesses = Array.new()
     @code = nil
-    #else
-      #@code = code
-      #if(code.length != 4)
-        #print "Code illegal length. Please try again"
-      #elsif(!code.split(//).to_set.subset? @@colours.collect{|colour| colour[0]}.to_set)
-        #print "illegal colours in code. Please try again"
-      #end
-    #end
   end
 
   def self.draw_colour_legend()
@@ -61,6 +53,7 @@ class MasterMind
   end
 
   def make_guess(guess)
+    return if !is_legal(guess)
     if(@code.nil?)
       @code = Array.new(4)
       @code = pick_code
@@ -75,14 +68,8 @@ class MasterMind
   end
 
   def solve(user_code)
-    if(user_code.length != 4)
-      print "Code illegal length. Please try again"
-      return
-    elsif(!user_code.split(//).to_set.subset? @@colours.collect{|colour| colour[0]}.to_set)
-      print "illegal colours in code. Please try again"
-      return
-    end
-    @code = user_code.split(//)
+    return if !is_legal(user_code)
+    @code = user_code
     code = pick_code
     while(!ended?)
       code = pick_code
@@ -134,6 +121,17 @@ class MasterMind
     puts ".: correct colour and position\n^:correct colour"
   end
 
+  def is_legal(code)
+    if(code.length != 4)
+      puts "Code illegal length. Please try again"
+      return false
+    elsif(!code.to_set.subset? @@colours.collect{|colour| colour[0]}.to_set)
+      puts "illegal colours in code. Please try again"
+      return false
+    end
+    return true
+  end
+
 end
 
 puts "Welcome to Mastermind!"
@@ -143,7 +141,7 @@ if gets.chomp().downcase() == "c"
   puts "create a code, of exactly 4 letters, for the computer to guess:"
   MasterMind.draw_colour_legend
   user_code = gets.chomp()
-  game.solve(user_code)
+  game.solve(user_code.split(//))
 else
   game.draw_board
   while(!game.ended?)
