@@ -8,6 +8,8 @@ class MasterMind
     @max_tries = 12
     @guesses = Array.new()
     @code = nil
+    @all_codes = Array.new()
+    generate_all_codes
   end
 
   def self.draw_colour_legend()
@@ -19,7 +21,7 @@ class MasterMind
   end
 
   def ended?()
-    if @guesses.size >= @max_tries
+    if @guesses.size > @max_tries
       puts "out of moves! you lost."
       puts "the answer was #{@code.join("")}"
       return true
@@ -53,67 +55,76 @@ class MasterMind
   end
 
   def make_guess(guess)
-    return if !is_legal(guess)
+    return if !is_legal?(guess)
     if(@code.nil?)
       @code = Array.new(4)
       @code = pick_code
     end
 
-    #guess_array = guess.split(//)
     if guess.size > @code.size
       puts "illegal guess: too many colours"
       return
     end
-    check_code(guess)
+    @guesses.push(check_code(guess))
   end
 
   def solve(user_code)
-    return if !is_legal(user_code)
+    return if !is_legal?(user_code)
     @code = user_code
-    code = pick_code
+    guess = pick_code
     while(!ended?)
-      code = pick_code
-      make_guess(code)
-      draw_board
+      make_guess(guess)
+      #choose our next guess so that it'll give the same score if our first guess was the code
+
+      #draw_board
     end
   end
 
   private
-  def check_code(guess_array)
+  def check_code(guess_array, code = nil)
     guess_orig = guess_array.dup
     num_correct = 0;
-    code_copy = @code.dup
+    code = @code.dup if code.nil?
     for i in 0..@code.size-1
       if(guess_array[i] == @code[i])
         num_correct = num_correct + 1
         guess_array[i] = nil
-        code_copy[i] = nil
+        code[i] = nil
       end
     end
     puts "num_correct #{num_correct}"
     num_almost = 0;
     for i in 0..guess_array.size-1
-      if (!guess_array[i].nil? && code_copy.include?(guess_array[i]))
+      if (!guess_array[i].nil? && code.include?(guess_array[i]))
         num_almost = num_almost + 1
-        for j in 0..code_copy.size-1
-          if(code_copy[j]==guess_array[i])
-            code_copy[j] = nil
+        for j in 0..code.size-1
+          if(code[j]==guess_array[i])
+            code[j] = nil
           end
         end
         guess_array[i] = ""
       end
     end
     puts "num_almost #{num_almost}"
-    @guesses.push(:guess => guess_orig, :correct => num_correct, :almost => num_almost)
+    return :guess => guess_orig, :correct => num_correct, :almost => num_almost
+    #@guesses.push(:guess => guess_orig, :correct => num_correct, :almost => num_almost)
+  end
+
+  def generate_all_codes()
+    for i in 0..5
+      for j in 0..5
+        for k in 0..5
+          for l in 0..5
+            @all_codes.push([@@colours[i][0], @@colours[j][0], @@colours[k][0], @@colours[l][0]])
+          end
+        end
+      end
+    end
   end
 
   def pick_code()
     rand = Random.new()
-    code = Array.new(4)
-    for i in 0..3
-      code[i] = @@colours[rand.rand(6)][0]
-    end
-    return code
+    return @all_codes[rand.rand(@all_codes.length()-1)]
   end
 
   def draw_feedback_legend()
@@ -121,7 +132,7 @@ class MasterMind
     puts ".: correct colour and position\n^:correct colour"
   end
 
-  def is_legal(code)
+  def is_legal?(code)
     if(code.length != 4)
       puts "Code illegal length. Please try again"
       return false
