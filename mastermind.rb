@@ -9,6 +9,7 @@ class MasterMind
     @guesses = Array.new()
     @code = nil
     @all_codes = Array.new()
+    @s = Array.new()
     generate_all_codes
   end
 
@@ -21,12 +22,12 @@ class MasterMind
   end
 
   def ended?()
-    if @guesses.size > @max_tries
+    if !@guesses[-1].nil? && @guesses[-1][:correct] == 4
+      puts "you win!"
+      return true
+    elsif @guesses.size >= @max_tries
       puts "out of moves! you lost."
       puts "the answer was #{@code.join("")}"
-      return true
-    elsif !@guesses[-1].nil? && @guesses[-1][:correct] == 4
-      puts "you win!"
       return true
     end
     return false
@@ -65,66 +66,88 @@ class MasterMind
       puts "illegal guess: too many colours"
       return
     end
-    @guesses.push(check_code(guess))
+    #binding.pry
+    result = check_code(guess)
+    @guesses.push(result.clone)
   end
 
   def solve(user_code)
     return if !is_legal?(user_code)
     @code = user_code
-    guess = pick_code
+    guess = ["r", "r", "b", "b"]
+    @all_codes.delete(guess)
     while(!ended?)
       make_guess(guess)
+      draw_board
       #choose our next guess so that it'll give the same score if our first guess was the code
-
-      #draw_board
+      #elimate the patterns that do not give the same score
+      @s.delete_if do |code|
+        result = check_code(code, Marshal.load(Marshal.dump(@guesses.last[:guess])))
+        if(result[:correct] != @guesses.last[:correct] || result[:almost] != @guesses.last[:almost])
+          #binding.pry
+          #puts "deleted #{result}"
+          true
+        else
+          false
+          #puts "didn't delete #{result}"
+        end
+      end
+      #binding.pry
+      guess = @s.first.clone
     end
   end
 
   private
-  def check_code(guess_array, code = nil)
-    guess_orig = guess_array.dup
+  def check_code(guess_array, code=nil)
+    #binding.pry
+    guess_clone = guess_array.clone
     num_correct = 0;
+    #binding.pry
     code = @code.dup if code.nil?
-    for i in 0..@code.size-1
-      if(guess_array[i] == @code[i])
+    for i in 0..code.size-1
+      if(guess_clone[i] == code[i])
         num_correct = num_correct + 1
-        guess_array[i] = nil
+        guess_clone[i] = nil
         code[i] = nil
       end
     end
-    puts "num_correct #{num_correct}"
+    #puts "num_correct #{num_correct}"
     num_almost = 0;
-    for i in 0..guess_array.size-1
-      if (!guess_array[i].nil? && code.include?(guess_array[i]))
+    for i in 0..guess_clone.size-1
+      if (!guess_clone[i].nil? && code.include?(guess_clone[i]))
         num_almost = num_almost + 1
         for j in 0..code.size-1
-          if(code[j]==guess_array[i])
+          if(code[j]==guess_clone[i])
             code[j] = nil
           end
         end
-        guess_array[i] = ""
+        guess_clone[i] = ""
       end
     end
-    puts "num_almost #{num_almost}"
-    return :guess => guess_orig, :correct => num_correct, :almost => num_almost
-    #@guesses.push(:guess => guess_orig, :correct => num_correct, :almost => num_almost)
+    #puts "num_almost #{num_almost}"
+    #binding.pry
+    return {:guess => guess_array, :correct => num_correct, :almost => num_almost}
   end
 
   def generate_all_codes()
-    for i in 0..5
-      for j in 0..5
-        for k in 0..5
-          for l in 0..5
-            @all_codes.push([@@colours[i][0], @@colours[j][0], @@colours[k][0], @@colours[l][0]])
+    for i in 0..@@colours.length-1
+      for j in 0..@@colours.length-1
+        for k in 0..@@colours.length-1
+          for l in 0..@@colours.length-1
+            #binding.pry
+            code = [@@colours[i][0], @@colours[j][0], @@colours[k][0], @@colours[l][0]]
+            @all_codes.push(code)
           end
         end
       end
     end
+    @s = @all_codes.dup
   end
 
   def pick_code()
     rand = Random.new()
-    return @all_codes[rand.rand(@all_codes.length()-1)]
+    code = @all_codes[rand.rand(@all_codes.length()-1)].clone
+    return code
   end
 
   def draw_feedback_legend()
